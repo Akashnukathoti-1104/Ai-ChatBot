@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NexusAI — Intelligent Chatbot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #080b14;
+      --surface: #0e1420;
+      --surface2: #141c2e;
+      --border: rgba(99,131,255,0.15);
+      --accent: #6383ff;
+      --accent2: #a78bfa;
+      --accent3: #34d399;
+      --text: #e8eaf6;
+      --text-muted: #6b7280;
+      --user-bubble: linear-gradient(135deg, #6383ff, #a78bfa);
+      --bot-bubble: #141c2e;
+      --glow: 0 0 40px rgba(99,131,255,0.15);
+      --shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; overflow: hidden; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    /* Background grid */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(99,131,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(99,131,255,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Header ── */
+    header {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+      background: rgba(8,11,20,0.8);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .logo-icon {
+      width: 38px; height: 38px;
+      background: var(--user-bubble);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      box-shadow: 0 0 20px rgba(99,131,255,0.4);
+    }
+    .logo-text {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.3rem;
+      background: linear-gradient(135deg, #fff, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .logo-sub { font-size: 0.72rem; color: var(--text-muted); margin-top: -2px; }
+    .header-status {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 0.8rem; color: var(--text-muted);
+    }
+    .status-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--accent3);
+      box-shadow: 0 0 8px var(--accent3);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(1.3); }
+    }
+    .header-actions { display: flex; gap: 8px; }
+    .header-btn {
+      padding: 7px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-muted);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .header-btn:hover { background: var(--surface2); color: var(--text); border-color: var(--accent); }
+
+    /* ── Chat container ── */
+    .chat-container {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      z-index: 1;
+    }
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      scroll-behavior: smooth;
+    }
+    .messages::-webkit-scrollbar { width: 4px; }
+    .messages::-webkit-scrollbar-track { background: transparent; }
+    .messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    /* Welcome state */
+    .welcome {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      text-align: center;
+      padding: 40px 20px;
+      animation: fadeUp 0.6s ease;
+    }
+    .welcome-icon {
+      width: 80px; height: 80px;
+      background: var(--user-bubble);
+      border-radius: 24px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 36px;
+      margin-bottom: 24px;
+      box-shadow: 0 0 60px rgba(99,131,255,0.3);
+    }
+    .welcome h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: 2rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #fff, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+    }
+    .welcome p { color: var(--text-muted); font-size: 1rem; max-width: 400px; line-height: 1.6; }
+    .quick-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 28px;
+      justify-content: center;
+    }
+    .quick-btn {
+      padding: 9px 16px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .quick-btn:hover {
+      border-color: var(--accent);
+      background: rgba(99,131,255,0.1);
+      transform: translateY(-1px);
+    }
+
+    /* Message bubbles */
+    .message {
+      display: flex;
+      gap: 12px;
+      max-width: 760px;
+      animation: fadeUp 0.3s ease;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .message.user { align-self: flex-end; flex-direction: row-reverse; }
+    .message.bot { align-self: flex-start; }
+    .avatar {
+      width: 36px; height: 36px; min-width: 36px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    .bot .avatar { background: var(--surface2); border: 1px solid var(--border); }
+    .user .avatar { background: var(--user-bubble); }
+    .bubble-wrap { display: flex; flex-direction: column; gap: 4px; max-width: 600px; }
+    .user .bubble-wrap { align-items: flex-end; }
+    .bubble {
+      padding: 12px 16px;
+      border-radius: 16px;
+      line-height: 1.6;
+      font-size: 0.92rem;
+      word-wrap: break-word;
+    }
+    .user .bubble {
+      background: var(--user-bubble);
+      border-bottom-right-radius: 4px;
+    }
+    .bot .bubble {
+      background: var(--bot-bubble);
+      border: 1px solid var(--border);
+      border-bottom-left-radius: 4px;
+    }
+    .bubble-meta {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      display: flex; gap: 10px; align-items: center;
+    }
+    .intent-tag {
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: rgba(99,131,255,0.15);
+      color: var(--accent);
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .feedback-btns { display: flex; gap: 4px; }
+    .fb-btn {
+      background: none; border: none;
+      cursor: pointer; font-size: 14px;
+      padding: 2px 4px; border-radius: 4px;
+      opacity: 0.5; transition: all 0.2s;
+    }
+    .fb-btn:hover { opacity: 1; background: rgba(255,255,255,0.05); }
+    .fb-btn.active { opacity: 1; }
+
+    /* Typing indicator */
+    .typing-indicator {
+      display: flex; gap: 12px; align-items: flex-end;
+      animation: fadeUp 0.3s ease;
+    }
+    .typing-dots {
+      padding: 14px 18px;
+      background: var(--bot-bubble);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      border-bottom-left-radius: 4px;
+      display: flex; gap: 5px; align-items: center;
+    }
+    .dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--text-muted);
+      animation: bounce 1.2s infinite;
+    }
+    .dot:nth-child(2) { animation-delay: 0.2s; }
+    .dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce {
+      0%,60%,100% { transform: translateY(0); opacity: 0.4; }
+      30% { transform: translateY(-6px); opacity: 1; }
+    }
+
+    /* ── Input area ── */
+    .input-area {
+      padding: 16px 20px 20px;
+      background: rgba(8,11,20,0.8);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border);
+      position: relative; z-index: 10;
+    }
+    .input-wrap {
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+      max-width: 760px;
+      margin: 0 auto;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 10px 12px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .input-wrap:focus-within {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(99,131,255,0.1);
+    }
+    #messageInput {
+      flex: 1;
+      background: none;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.92rem;
+      line-height: 1.5;
+      resize: none;
+      max-height: 120px;
+      padding: 2px 4px;
+    }
+    #messageInput::placeholder { color: var(--text-muted); }
+    .send-btn {
+      width: 38px; height: 38px; min-width: 38px;
+      border-radius: 10px;
+      border: none;
+      background: var(--user-bubble);
+      color: #fff;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+      font-size: 16px;
+    }
+    .send-btn:hover { transform: scale(1.05); box-shadow: 0 4px 16px rgba(99,131,255,0.4); }
+    .send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+    .input-hint {
+      text-align: center;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 8px;
+    }
+
+    /* Markdown-like rendering in bubbles */
+    .bubble strong { font-weight: 600; color: #fff; }
+    .bubble em { font-style: italic; }
+    .bubble br { display: block; margin: 4px 0; }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 100px; left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 100;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .header-actions { display: none; }
+      .welcome h1 { font-size: 1.5rem; }
+      .messages { padding: 16px 12px; }
+      .message { max-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <div class="logo">
+      <div class="logo-icon">🤖</div>
+      <div>
+        <div class="logo-text">NexusAI</div>
+        <div class="logo-sub">Intelligent Assistant</div>
+      </div>
+    </div>
+    <div class="header-status">
+      <div class="status-dot"></div>
+      <span>Online</span>
+    </div>
+    <div class="header-actions">
+      <a href="/admin" class="header-btn">📊 Dashboard</a>
+      <button class="header-btn" onclick="clearChat()">🗑 Clear</button>
+    </div>
+  </header>
+
+  <!-- Chat -->
+  <div class="chat-container">
+    <div class="messages" id="messages">
+      <!-- Welcome state -->
+      <div class="welcome" id="welcome">
+        <div class="welcome-icon">🤖</div>
+        <h1>Hi, I'm NexusAI</h1>
+        <p>Your intelligent AI assistant. Ask me about pricing, features, technical support, or anything else!</p>
+        <div class="quick-actions">
+          <button class="quick-btn" onclick="sendQuick('What can you do?')">✨ What can you do?</button>
+          <button class="quick-btn" onclick="sendQuick('Show me pricing plans')">💰 Pricing</button>
+          <button class="quick-btn" onclick="sendQuick('I need technical help')">🔧 Tech support</button>
+          <button class="quick-btn" onclick="sendQuick('What are your working hours?')">🕐 Hours</button>
+          <button class="quick-btn" onclick="sendQuick('Tell me about yourself')">🤖 About you</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Input area -->
+    <div class="input-area">
+      <div class="input-wrap">
+        <textarea id="messageInput" rows="1" placeholder="Ask me anything..." 
+          onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+        <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </button>
+      </div>
+      <div class="input-hint">Press Enter to send · Shift+Enter for new line</div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+  let sessionId = localStorage.getItem('nexus_session') || null;
+  let messageCount = 0;
+
+  function autoResize(el) {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+  }
+
+  function handleKey(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  }
+
+  function sendQuick(text) {
+    document.getElementById('messageInput').value = text;
+    sendMessage();
+  }
+
+  async function sendMessage() {
+    const input = document.getElementById('messageInput');
+    const text = input.value.trim();
+    if (!text) return;
+
+    const sendBtn = document.getElementById('sendBtn');
+    sendBtn.disabled = true;
+    input.value = '';
+    input.style.height = 'auto';
+
+    // Hide welcome
+    const welcome = document.getElementById('welcome');
+    if (welcome) welcome.remove();
+
+    appendMessage('user', text);
+    const typing = showTyping();
+
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text, session_id: sessionId })
+      });
+      const data = await res.json();
+
+      removeTyping(typing);
+
+      if (data.session_id) {
+        sessionId = data.session_id;
+        localStorage.setItem('nexus_session', sessionId);
+      }
+
+      appendBotMessage(data);
+    } catch (err) {
+      removeTyping(typing);
+      appendMessage('bot', '⚠️ Connection error. Please check your network and try again.');
+    }
+
+    sendBtn.disabled = false;
+    input.focus();
+  }
+
+  function appendMessage(role, text) {
+    messageCount++;
+    const msgs = document.getElementById('messages');
+    const div = document.createElement('div');
+    div.className = `message ${role}`;
+    div.innerHTML = `
+      <div class="avatar">${role === 'user' ? '👤' : '🤖'}</div>
+      <div class="bubble-wrap">
+        <div class="bubble">${formatText(text)}</div>
+        <div class="bubble-meta">${formatTime(new Date())}</div>
+      </div>`;
+    msgs.appendChild(div);
+    scrollToBottom();
+    return div;
+  }
+
+  function appendBotMessage(data) {
+    messageCount++;
+    const msgs = document.getElementById('messages');
+    const div = document.createElement('div');
+    div.className = 'message bot';
+    div.innerHTML = `
+      <div class="avatar">🤖</div>
+      <div class="bubble-wrap">
+        <div class="bubble">${formatText(data.response)}</div>
+        <div class="bubble-meta">
+          <span>${formatTime(new Date())}</span>
+          ${data.intent !== 'default' ? `<span class="intent-tag">${data.intent}</span>` : ''}
+          <span>${data.response_time_ms}ms</span>
+          <span class="feedback-btns">
+            <button class="fb-btn" onclick="sendFeedback(this, ${data.message_id}, 1)" title="Helpful">👍</button>
+            <button class="fb-btn" onclick="sendFeedback(this, ${data.message_id}, -1)" title="Not helpful">👎</button>
+          </span>
+        </div>
+      </div>`;
+    msgs.appendChild(div);
+    scrollToBottom();
+  }
+
+  function showTyping() {
+    const msgs = document.getElementById('messages');
+    const div = document.createElement('div');
+    div.className = 'typing-indicator';
+    div.innerHTML = `
+      <div class="avatar" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;">🤖</div>
+      <div class="typing-dots">
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+      </div>`;
+    msgs.appendChild(div);
+    scrollToBottom();
+    return div;
+  }
+
+  function removeTyping(el) { if (el && el.parentNode) el.remove(); }
+
+  function scrollToBottom() {
+    const msgs = document.getElementById('messages');
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function formatText(text) {
+    return text
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      .replace(/\n/g, '<br>');
+  }
+
+  function formatTime(d) {
+    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+
+  async function sendFeedback(btn, msgId, rating) {
+    btn.classList.add('active');
+    btn.parentElement.querySelectorAll('.fb-btn').forEach(b => b.disabled = true);
+    try {
+      await fetch('/api/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message_id: msgId, rating })
+      });
+      showToast(rating === 1 ? '👍 Thanks for the positive feedback!' : '👎 Thanks — we\'ll improve!');
+    } catch {}
+  }
+
+  function clearChat() {
+    sessionId = null;
+    localStorage.removeItem('nexus_session');
+    const msgs = document.getElementById('messages');
+    msgs.innerHTML = `
+      <div class="welcome" id="welcome">
+        <div class="welcome-icon">🤖</div>
+        <h1>Hi, I'm NexusAI</h1>
+        <p>Your intelligent AI assistant. Ask me about pricing, features, technical support, or anything else!</p>
+        <div class="quick-actions">
+          <button class="quick-btn" onclick="sendQuick('What can you do?')">✨ What can you do?</button>
+          <button class="quick-btn" onclick="sendQuick('Show me pricing plans')">💰 Pricing</button>
+          <button class="quick-btn" onclick="sendQuick('I need technical help')">🔧 Tech support</button>
+          <button class="quick-btn" onclick="sendQuick('What are your working hours?')">🕐 Hours</button>
+        </div>
+      </div>`;
+    showToast('Chat cleared ✓');
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  // Auto-focus
+  document.getElementById('messageInput').focus();
+</script>
+</body>
+</html>

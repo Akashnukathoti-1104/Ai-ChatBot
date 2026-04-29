@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: nexusai-chatbot
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements-light.txt && python -c "import nltk; nltk.download('punkt'); nltk.download('punkt_tab'); nltk.download('stopwords'); nltk.download('wordnet')"
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DB_PATH
+        value: /tmp/data/chatbot.db
+      - key: PYTHON_VERSION
+        value: 3.11.0
+    healthCheckPath: /health
+    autoDeploy: true

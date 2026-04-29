@@ -1,0 +1,10 @@
+# Lightweight version (no PyTorch - faster deploys on Render free tier)
+# Use this if Render runs out of memory with the full requirements.txt
+fastapi==0.111.0
+uvicorn[standard]==0.30.1
+jinja2==3.1.4
+python-multipart==0.0.9
+pydantic==2.7.1
+nltk==3.8.1
+aiofiles==23.2.1
+httpx==0.27.0
