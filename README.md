@@ -144,14 +144,17 @@ git push -u origin main
 3. Configure:
    - **Name**: `nexusai-chatbot`
    - **Runtime**: `Python 3`
+   - **Runtime**: Python — **version `3.11.9`** (set this explicitly to avoid Python 3.14 Rust issues)
    - **Build Command**: 
      ```
-     pip install -r requirements-light.txt && python -c "import nltk; nltk.download('punkt'); nltk.download('punkt_tab'); nltk.download('stopwords'); nltk.download('wordnet')"
+     pip install --upgrade pip && pip install -r requirements-light.txt && python -c "import nltk; nltk.download('punkt_tab', quiet=True); nltk.download('stopwords', quiet=True); nltk.download('wordnet', quiet=True)"
      ```
    - **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
    - **Plan**: Free
 4. Add Environment Variable:
    - `DB_PATH` = `/tmp/data/chatbot.db`
+
+> ⚠️ **Important**: Always set Python to `3.11.x` on Render. Python 3.14 (Render's default) tries to compile `pydantic-core` from Rust source, which fails on Render's read-only filesystem. Python 3.11 has pre-built wheels that install instantly.
 5. Click **Deploy** 🚀
 
 ### Step 3 — Access Your App
