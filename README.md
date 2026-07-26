@@ -35,14 +35,11 @@ cp .env.example .env
 This app intentionally does **not** load `.env` automatically. For local development, export the values before starting (or configure them in your IDE):
 
 ```bash
-export BOT_OWNER_NAME="Your Name"
-export BOT_OWNER_BIO="A short description of you or your business."
-export SUPPORT_EMAIL="you@example.com"
+export BOT_OWNER_NAME="Nukathoti Akash"
+export BOT_OWNER_BIO="Welcome to my arena."
+export SUPPORT_EMAIL="akashnukathoti147@gmail.com"
 export ADMIN_TOKEN="use-a-long-random-secret"
-export LLM_API_KEY="your-provider-key"       # enables broad AI answers
-# Optional if using a provider other than the OpenAI API:
-# export LLM_BASE_URL="https://your-provider.example/v1"
-# export LLM_MODEL="your-model-name"
+export LLM_API_KEY="N"       # enables broad AI answers
 ```
 
 `LLM_API_KEY` and `OPENAI_API_KEY` are both recognized. The default API endpoint is `https://api.openai.com/v1`, with `gpt-4o-mini` as the default model. You can point `LLM_BASE_URL` and `LLM_MODEL` to any provider that implements the OpenAI **Chat Completions** format.
