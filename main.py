@@ -1,16 +1,16 @@
+"""Nani entry point.
+
+Run locally with: python main.py
 """
-NexusAI Chatbot - Entry Point
-Run locally: python main.py
-"""
-import uvicorn
 import os
 
+import uvicorn
+
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8000))
     uvicorn.run(
         "app.main:app",
         host="0.0.0.0",
-        port=port,
+        port=int(os.environ.get("PORT", 8000)),
         reload=True,
-        log_level="info"
+        log_level="info",
     )

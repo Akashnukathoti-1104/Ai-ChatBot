@@ -1,1 +1,1 @@
-# NexusAI Chatbot Application
+"""Nani AI assistant application."""
